@@ -10,16 +10,16 @@ This repository demonstrates **user and permission misconfigurations** in Linux,
 ### ✅ **Setup: Creating Users & Misconfiguring Permissions**
 
 ```bash
-# Creating user rcb
+# Creating user CSK
 ┌──(kali㉿kali)-[~/Desktop]
-└─$ sudo useradd rcb
+└─$ sudo useradd CSK
 
 # Set passwords for the users
 ┌──(kali㉿kali)-[~/Desktop]
-└─$ echo "rcb:1234" | sudo chpasswd
+└─$ echo "CSK:1234" | sudo chpasswd
 
 # Verify users exist
-cat /etc/passwd | grep "rcb"
+cat /etc/passwd | grep "CSK"
 
 # Check default permissions of sensitive files
 ┌──(kali㉿kali)-[~/Desktop]
@@ -41,9 +41,9 @@ cat /etc/passwd | grep "rcb"
 ### ✅ **Exploitation: Accessing Sensitive Files as a Low-Privileged User**
 
 ```bash
-# Switch to rcb (a low-privileged user)
+# Switch to CSK (a low-privileged user)
 ┌──(kali㉿kali)-[~]
-└─$ su - rcb
+└─$ su - CSK
 Password: 1234
 
 # Try reading sensitive files
@@ -80,26 +80,26 @@ sudo visudo
 
 **Restrict Alice from switching to root** by adding:
 ```plaintext
-rcb ALL=(ALL) !/bin/su, !/bin/bash
+CSK ALL=(ALL) !/bin/su, !/bin/bash
 ```
 ## 📌 Task 1 - Summary  
 
 | **Step**             | **Action**                                         | **Command**                                  |
 |----------------------|---------------------------------------------------|---------------------------------------------|
-| 🔹 **Setup**         | Create user **rcb**                                | `sudo useradd rcb` |
-|                     | Set password for **rcb**                           | `echo "rcb:password123" | sudo chpasswd` |
-|                     | Verify user exists                                 | `cat /etc/passwd | grep rcb` |
+| 🔹 **Setup**         | Create user **CSK**                                | `sudo useradd CSK` |
+|                     | Set password for **CSK**                           | `echo "CSK:password123" | sudo chpasswd` |
+|                     | Verify user exists                                 | `cat /etc/passwd | grep CSK` |
 |                     | Check default permissions of sensitive files       | `ls -l /etc/shadow /etc/passwd` |
 |                     | Assign incorrect permissions (INSECURE)            | `sudo chmod 777 /etc/shadow` |
 |                     | Verify permission changes                          | `ls -l /etc/shadow` |
-| 🔹 **Exploitation**  | Switch to **rcb** (low-privileged user)           | `su - rcb` |
+| 🔹 **Exploitation**  | Switch to **CSK** (low-privileged user)           | `su - CSK` |
 |                     | Try accessing sensitive files                      | `cat /etc/shadow`<br>`cat /etc/passwd` |
 |                     | Try modifying `/etc/shadow` (Critical exploit!)    | `echo "hacked::0:0::/:/bin/bash" | tee -a /etc/shadow` |
 |                     | Switch back to root                                | `su` |
 | 🔹 **Mitigation**    | Restore secure permissions                        | `sudo chmod 640 /etc/shadow`<br>`sudo chown root:shadow /etc/shadow` |
 |                     | Verify permission fix                              | `ls -l /etc/shadow` |
 | 🔹 **Secure Sudo Privileges** | Edit sudoers file                   | `sudo visudo` |
-|                     | Restrict **rcb** from switching to root            | Add the following in `visudo`:<br>`rcb ALL=(ALL) !/bin/su, !/bin/bash` |
+|                     | Restrict **CSK** from switching to root            | Add the following in `visudo`:<br>`rcb ALL=(ALL) !/bin/su, !/bin/bash` |
 
 ---
 
