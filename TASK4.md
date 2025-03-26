@@ -5,7 +5,7 @@ This repository demonstrates **user and permission misconfigurations** in Linux,
 
 ---
 
-## 🔹 **Task 1: User & Permission Misconfigurations**
+## 🔹 **Task 5: User & Permission Misconfigurations**
 
 ### ✅ **Setup: Creating Users & Misconfiguring Permissions**
 
