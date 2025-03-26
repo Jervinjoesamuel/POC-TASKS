@@ -111,4 +111,4 @@ bash-5.2# ls -l /root/root_script.sh
 |                      | Restrict script execution to root only            | `sudo chmod 700 /root/root_script.sh` |
 |                      | Verify permissions after mitigation                | `ls -l /bin/bash /root/root_script.sh` |
 
-### **END-x-**
+### ***************************************************THE END***************************************************
