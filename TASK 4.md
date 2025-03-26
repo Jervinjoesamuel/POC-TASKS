@@ -128,6 +128,3 @@ bash-5.2# ls -l /root/root_script.sh
 ✅ **Understanding SUID vulnerabilities is crucial for both ethical hacking and system security. Always audit your system to prevent privilege escalation attacks!**
 
 🚀 Stay Secure! 🔒
-
-
---------------------------------------------THE END ----------------------------------------------
