@@ -1,55 +1,134 @@
-# POC-TASKS
-# 📌 Linux Security - Exploitation & Hardening (PoC)
+# 🔥 Advanced Linux Security: Exploitation & Hardening
 
-This repository demonstrates **user and permission misconfigurations** in Linux, including **exploitation and mitigation**.
+Welcome to the **Ultimate Security Audit Framework** for Linux! 🛡️ This repository provides an automated solution for **monitoring, detecting, and mitigating security threats** on Linux systems.
 
 ---
 
-## 🔹 **Task 5: User & Permission Misconfigurations**
+## 🚀 Project Scope
+This security automation tool helps you:
+- 🔍 **Monitor user login attempts** (`last`, `auth.log`)
+- ⚙️ **Detect and analyze running services** (`systemctl`)
+- 📊 **Assess disk usage** (`df -h`)
+- 🚨 **Trigger real-time alerts for unauthorized SSH access**
 
-### ✅ **Setup: Creating Users & Misconfiguring Permissions**
+---
+
+## 🛠️ Step 1: Deploy the Security Audit Script
+
+### 📌 1️⃣ Create & Edit the Bash Script
+Run this command to create the script file:
 
 ```bash
-# Security Audit Script (Kali Linux)
-LOG_FILE="/var/log/auth.log"
-OUTPUT_FILE="security_audit_report.txt"
-EMAIL="admin@example.com"
+┌──(root㉿linux)-[~]
+└─$ nano security_audit.sh
+```
 
-# Kali Linux Prompt Style
-PROMPT="┌──(kali㉿kali)-[~/Desktop]"
+Copy and paste the following into the editor:
 
-# Function to check user login attempts
-echo "$PROMPT Checking User Login Attempts..." > $OUTPUT_FILE
-last >> $OUTPUT_FILE
-echo -e "\n$PROMPT Recent Authentication Logs:" >> $OUTPUT_FILE
-grep "Failed\|Accepted" $LOG_FILE | tail -20 >> $OUTPUT_FILE
+```bash
+#!/bin/bash
+# Linux Security Audit Script 🚨
+LOG_FILE="/var/log/auth.log"  # On some systems, use /var/log/secure
+ALERT_EMAIL="admin@example.com"
 
-# Function to detect running services
-echo -e "\n$PROMPT Detecting Running Services..." >> $OUTPUT_FILE
-systemctl list-units --type=service --state=running >> $OUTPUT_FILE
+# 📝 Log user login history
+echo "====== User Login History ======"
+last -n 10
+echo ""
 
-# Function to monitor disk usage
-echo -e "\n$PROMPT Monitoring Disk Usage..." >> $OUTPUT_FILE
-df -h >> $OUTPUT_FILE
+# 🚔 Detect unauthorized SSH access
+echo "====== Unauthorized SSH Access ======"
+grep "Failed password" $LOG_FILE | tail -n 10
+echo ""
 
-# Check for old user accounts (potential exploit)
-echo -e "\n$PROMPT Checking for Old User Accounts..." >> $OUTPUT_FILE
-awk -F: '$3 < 1000 {print $1}' /etc/passwd >> $OUTPUT_FILE
+# 🛠️ Inspect running services
+echo "====== Active Services ======"
+systemctl list-units --type=service --state=running | tail -n 20
+echo ""
 
-# Simulate Exploit - Check for users with empty passwords
-echo -e "\n$PROMPT Users with Empty Passwords (Potential Exploit)..." >> $OUTPUT_FILE
-awk -F: '($2=="!") || ($2=="*") {print $1}' /etc/shadow >> $OUTPUT_FILE
+# 💾 Check disk space usage
+echo "====== Disk Space Usage ======"
+df -h | grep "^/dev"
+echo ""
 
-# Creating a test user 'CSK'
-echo "$PROMPT Creating a test user 'CSK'..."
-sudo useradd -m CSK && echo "CSK:password" | sudo chpasswd
+# 🚨 Alert on SSH brute-force attempts
+if grep -q "Failed password" $LOG_FILE; then
+    echo "[SECURITY ALERT] Unauthorized SSH login detected!" | mail -s "Critical Security Alert" $ALERT_EMAIL
+fi
+```
 
-# Mitigation: Setup a cron job for security monitoring (Kali Linux)
-echo "$PROMPT Setting up security monitoring cron job..."
-echo "* * * * * root /path/to/security_audit.sh | mail -s \"Security Alert\" $EMAIL" > /etc/cron.d/security_monitor
+---
 
-# Send alert if unauthorized SSH login attempts occur
-echo "$PROMPT Checking for unauthorized SSH login attempts..."
-grep "Failed password" $LOG_FILE | tail -5 | mail -s "Unauthorized SSH Attempt Alert" $EMAIL
+## 🛠️ Step 2: Execute the Security Audit Script
 
-echo "$PROMPT Security audit completed on Kali Linux. Report saved in $OUTPUT_FILE"
+Make the script executable:
+```bash
+chmod +x security_audit.sh
+```
+
+Run the script:
+```bash
+./security_audit.sh
+```
+
+Example Output:
+```
+====== User Login History ======
+root     pts/0    192.168.1.5    Mon Mar 18 10:45 - 10:50  (00:05)
+...
+
+====== Unauthorized SSH Access ======
+Mar 18 11:10:21 linux sshd[1234]: Failed password for root from 192.168.1.10 port 5402 ssh2
+...
+
+====== Active Services ======
+apache2.service      loaded active running The Apache HTTP Server
+ssh.service          loaded active running OpenSSH server daemon
+...
+
+====== Disk Space Usage ======
+/dev/sda1        50G  20G  30G  40% /
+...
+```
+
+---
+
+## 🔄 Step 3: Automate Security Checks with Cron
+
+### 🕒 Schedule the script to run every 10 minutes:
+```bash
+crontab -e
+```
+
+Add the following line:
+```bash
+*/10 * * * * /path/to/security_audit.sh >> /var/log/security_audit.log 2>&1
+```
+
+Verify the scheduled task:
+```bash
+crontab -l
+cat /var/log/security_audit.log
+```
+
+---
+
+## 📌 Task Summary
+
+| **Step**  | **Task** | **Command/Details** |
+|-----------|---------|--------------------|
+| **1️⃣ Create the Script** | Develop a security audit script | `nano security_audit.sh` |
+| **2️⃣ Add Security Checks** | Track user logins, SSH attempts, active services, and disk usage | See script above |
+| **3️⃣ Make Executable** | Allow script execution | `chmod +x security_audit.sh` |
+| **4️⃣ Run Script** | Execute manually | `./security_audit.sh` |
+| **5️⃣ Automate via Cron** | Run script every 10 mins | `crontab -e` + cron entry |
+| **6️⃣ Verify Output** | Check logs | `cat /var/log/security_audit.log` |
+| **7️⃣ Threat Analysis** | Review failed logins & anomalies | **Monitor script output** |
+| **8️⃣ Apply Mitigation** | Strengthen SSH, disable unused accounts | `sudo passwd -l user` <br> `sudo nano /etc/ssh/sshd_config` |
+
+---
+
+### 🛡️ Final Thoughts
+✅ **Deploy this script today and enhance your Linux security posture!**
+
+🚀 Happy Hardening! 🔒
